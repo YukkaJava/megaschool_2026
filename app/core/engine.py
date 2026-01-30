@@ -29,15 +29,15 @@ class InterviewEngine:
         last_obs = {"quality": "correct", "reason": "Начало интервью"}
         last_input = intro
 
-
         for i in range(1, 11):
+            # 1. Сначала генерируем ответ агента
             res = self.interviewer.generate_response(
                 last_input, last_obs, self.memory.turns,
                 self.memory.candidate_level, self.memory.candidate_role,
                 self.memory.stack, self.memory.get_current_difficulty_str()
             )
 
-
+            # 2. Очищаем текст от системных пометок
             reaction = res.get('reaction', '')
             for bad_word in ["Похвала:", "Строгая:", "Комментарий:", "Реакция:"]:
                 reaction = reaction.replace(bad_word, "")
@@ -47,22 +47,33 @@ class InterviewEngine:
 
             print(f"\n🔹 [Ход {i}] 🤖 Agent: {full_agent_msg}")
 
+            # 3. Получаем ввод пользователя
             user_ans = input("👤 You: ")
-            if user_ans.lower() in ['стоп', 'exit', 'выход']:
+
+            # 4. УЛУЧШЕННАЯ ПРОВЕРКА НА ВЫХОД
+            # Приводим к нижнему регистру и проверяем наличие ключевых слов
+            check_ans = user_ans.lower()
+            stop_words = ['стоп', 'exit', 'выход', 'stop', 'завершить']
+
+            if any(word in check_ans for word in stop_words):
+                print("\n🛑 Интервью прервано пользователем. Переходим к формированию отчета...")
                 break
 
-
+            # 5. Если не стоп — анализируем ответ Обсервером
             last_obs = self.observer.analyze_answer(
                 question, user_ans, self.memory.stack,
                 self.memory.candidate_level, self.memory.candidate_role
             )
 
-
+            # 6. Записываем ход в память и логи
             thoughts = f"[Observer]: {last_obs.get('reason', 'Нет данных')}\n[Interviewer]: {res.get('thought', 'Нет данных')}"
             self.memory.add_turn(question, user_ans, last_obs, res.get('topic'))
             self.logger.log_turn(i, full_agent_msg, user_ans, thoughts)
+
+            # Обновляем входные данные для следующего шага
             last_input = user_ans
 
+        # После выхода из цикла всегда запускаем финал
         self.finish_interview(scenario)
 
     def finish_interview(self, scenario_num):
