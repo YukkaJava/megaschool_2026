@@ -31,5 +31,5 @@
 
 1. **Клонируйте репозиторий:**
    ```bash
-   git clone [https://github.com/YukkaJava/megaschool_2026.git](https://github.com/YukkaJava/megaschool_2026)
+   git clone https://github.com/YukkaJava/megaschool_2026
   
