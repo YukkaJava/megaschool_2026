@@ -31,7 +31,7 @@ class HiringManagerAgent:
         resources_hint = "\n".join([f"- {k}: {v}" for k, v in self.resource_library.items()])
 
         prompt = f"""
-        Ты — Lead Hiring Manager. Проанализируй интервью Юлии Францевой.
+        Ты — Lead Hiring Manager. Проанализируй интервью
 
         ТРАНСКРИПТ:
         {full_transcript}
